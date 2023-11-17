@@ -1,0 +1,50 @@
+name: Translate CI
+
+on:
+  push:
+    branches: '*'
+    tags: '*'
+
+env:
+  ORG_URL: https://fearlessrevolution.com/download/file.php?id=50081&sid=9e15b6e04206861128ccaa386cee1a40
+  ORG_VERSION: v10
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download original file
+        run: curl -o translating.ct $ORG_URL
+
+      - name: Run translate script
+        run: |
+          chmod +x Translate.sh
+          ./Translate.sh
+
+      - name: Rename & Calculate SHA256
+        run: |
+          mv translating.ct MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT
+          ls -l
+          echo "RELEASE_CT_SHA=$(sha256sum MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT | awk '{ print $1 }')" >> $GITHUB_ENV
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}
+          path: MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}.CHS.CT
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          name: MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}.CHS.CT
+          body: |
+            ### 文件校验
+            | 文件 | SHA-256 |
+            | --- | --- |
+            | MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }} | ${{ env.RELEASE_CT_SHA }} |
