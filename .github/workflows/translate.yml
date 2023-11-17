@@ -22,12 +22,13 @@ jobs:
       - name: Install requirements
         run: |
           sudo apt update
-          sudo apt install -y jq
+          sudo apt install -y jq dos2unix
 
       - name: Downloading file
         run: |
           echo "Downloading original script..."
           curl -o translating.ct $ORG_URL
+          dos2unix translating.ct
           echo "Downloading MHRice data..."
           curl -o mhrice.json https://mhrise.mhrice.info/mhrice.json
           echo "Export items_name_msg & items_name_msg_mr to single file"
