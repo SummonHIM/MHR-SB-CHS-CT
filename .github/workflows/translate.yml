@@ -26,11 +26,11 @@ jobs:
 
       - name: Downloading file
         run: |
-          echo Downloading original script...
+          echo "Downloading original script..."
           curl -o translating.ct $ORG_URL
-          echo Downloading MHRice data...
+          echo "Downloading MHRice data..."
           curl -o mhrice.json https://mhrise.mhrice.info/mhrice.json
-          echo Export items_name_msg & items_name_msg_mr to single file
+          echo "Export items_name_msg & items_name_msg_mr to single file"
           jq '.items_name_msg' mhrice.json > mhrice.itemname.json
           jq '.items_name_msg_mr' mhrice.json > mhrice.itemnamemr.json
 
