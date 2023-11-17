@@ -3,13 +3,30 @@
 FILE_NAME=translating.ct
 
 translate() {
+    echo "正在翻译原描述 $1 至 $2"
     sed -i "s/<Description>\"$1\"<\/Description>/<Description>\"$2\"<\/Description>/g" $FILE_NAME
 }
 
-findItemTranslate() {
-    local SEARCH_URL=https://mhrise.mhrice.info/item/normal_$1.html
-    local SEARCH_LANG=zh-CN
-    curl -s "$SEARCH_URL" | grep -oP "<h1>.*?<span class=\"mh-lang\" lang=\"$SEARCH_LANG\"><span>[^<]+</span></span>.*?</h1>" | sed -n "s/<h1>.*<span class=\"mh-lang\" lang=\"$SEARCH_LANG\"><span>\([^<]\+\)<\/span><\/span>.*<\/h1>/\1/p"
+fullReplace() {
+    sed -i "s/$1/$2/g" $FILE_NAME
+}
+
+getItemTranslate() {
+    local decimalID
+    local org
+    local ret
+    decimalID=$(printf "%04d" "$((16#$1))")
+
+    org=$(jq -r --arg id "$decimalID" '.entries[] | select(.name == "I_\($id)_Name").content[1]' mhrice.itemname.json)
+    ret=$(jq -r --arg id "$decimalID" '.entries[] | select(.name == "I_\($id)_Name").content[13]' mhrice.itemname.json)
+    if [[ -z "$org" || -z "$ret" ]]; then
+        org=$(jq -r --arg id "$decimalID" '.entries[] | select(.name == "I_\($id)_Name").content[1]' mhrice.itemnamemr.json)
+        ret=$(jq -r --arg id "$decimalID" '.entries[] | select(.name == "I_\($id)_Name").content[13]' mhrice.itemnamemr.json)
+    fi
+
+    if [[ $org == "$2" ]]; then
+        echo "$ret"
+    fi
 }
 
 translate 'Team: Tuuup! \&amp; Insterluda (click for auto attach to game) 14.0.0.0' '制作团队：Tuuup! \&amp; Insterluda 汉化团队：凉先森 \&amp; SummonHIM（单击此处自动关联游戏进程） 14.0.0.0'
@@ -20,7 +37,7 @@ translate 'Kamura points' '炎火点数'
 translate 'Inf Stamina  v5? (fix 15.0.0.0)' '无限耐力  v5? （修复 15.0.0.0）'
 translate 'God mode \/ no knockback v3 (update 15.0.0.0.0)' '上帝模式 \/ 无击退模式 v3 （更新 15.0.0.0.0）'
 translate '1 hit kill \/ damage multiplier shows in stats v2' '一拳超人 \/ 修改伤害倍率 v2'
-translate '\&lt;-- For multiplier and to disable OHK' '\&lt;-- 多人联机时会禁用一拳超人'
+translate '\&lt;-- For multiplier and to disable OHK' '\&lt;-- 多人联机时禁用一拳超人'
 translate 'Damage multiplier (default 2x)' '伤害倍率（默认两倍）'
 translate '100% Affinity\/crit change in battle' '战斗中调整会心率\/暴击率为 100%'
 translate 'inf Wirebug v2 (v14.0.0.0)' '无限翔虫 v2 (v14.0.0.0)'
@@ -119,6 +136,13 @@ translate 'P. Max Stamania' 'P. 最大耐力'
 translate 'P. Max Regen Stamania' 'P. 最大恢复耐力'
 
 while IFS=: read -r hexCode itemName; do
-    newItemName=$(findItemTranslate "$hexCode")
-    translate "$hexCode:$itemName" "$hexCode:$newItemName"
-done < <(sed -n '/<DropDownList .*>/,/<\/DropDownList>/ { /^[[:space:]]*<DropDownList .*>/d; /<\/DropDownList>/d; /^[[:space:]]*$/d; p; }' $FILE_NAME)
+    if [[ -n "$hexCode" ]]; then
+        newItemName=$(getItemTranslate "$hexCode" "$itemName")
+        if [[ -n "$newItemName" ]]; then
+            echo "正在根据名称数据库翻译物品ID $hexCode:$itemName 至 $hexCode:$newItemName"
+            fullReplace "$hexCode:$itemName" "$hexCode:$newItemName"
+        else
+            echo "错误： 物品ID $hexCode:$itemName 无法翻译。原因是未在名称数据库中找到相对应的字符串。或原名称与数据库中英文名称不匹配。"
+        fi
+    fi
+done < <(sed -n -e '/<DropDownList/{:a' -e 'N;/<\/DropDownList>/!ba' -e 's/ *<DropDownList[^>]*>\(.*\)<\/DropDownList>/\1/p}' $FILE_NAME)

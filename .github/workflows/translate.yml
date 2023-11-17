@@ -19,8 +19,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Download original file
-        run: curl -o translating.ct $ORG_URL
+      - name: Install requirements
+        run: |
+          sudo apt update
+          sudo apt install -y jq
+
+      - name: Downloading file
+        run: |
+          echo Downloading original script...
+          curl -o translating.ct $ORG_URL
+          echo Downloading MHRice data...
+          curl -o mhrice.json https://mhrise.mhrice.info/mhrice.json
+          echo Export items_name_msg & items_name_msg_mr to single file
+          jq '.items_name_msg' mhrice.json > mhrice.itemname.json
+          jq '.items_name_msg_mr' mhrice.json > mhrice.itemnamemr.json
 
       - name: Run translate script
         run: |
@@ -30,13 +42,16 @@ jobs:
       - name: Rename & Calculate SHA256
         run: |
           mv translating.ct MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT
+          sha256sum MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT > MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT.sha256
           echo "RELEASE_CT_SHA=$(sha256sum MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT | awk '{ print $1 }')" >> $GITHUB_ENV
 
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}
-          path: MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}.CHS.CT
+          path: |
+            MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}.CHS.CT
+            MonsterHunterRise-sb-${{ env.ORG_VERSION }}-CHS${{ github.ref_name }}.CHS.CT.sha256
 
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')

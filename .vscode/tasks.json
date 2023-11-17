@@ -6,7 +6,7 @@
         {
             "label": "Run Translate.sh",
             "type": "shell",
-            "command": "C:\\Environment\\msys64\\msys2_shell.cmd -defterm -here -no-start -msys Translate.sh"
+            "command": "C:\\Environment\\msys64\\msys2_shell.cmd -defterm -here -no-start -mingw64 Translate.sh"
         }
     ]
 }
