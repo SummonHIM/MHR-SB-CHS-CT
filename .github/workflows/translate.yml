@@ -30,7 +30,6 @@ jobs:
       - name: Rename & Calculate SHA256
         run: |
           mv translating.ct MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT
-          ls -l
           echo "RELEASE_CT_SHA=$(sha256sum MonsterHunterRise-sb-$ORG_VERSION-CHS$GITHUB_REF_NAME.CHS.CT | awk '{ print $1 }')" >> $GITHUB_ENV
 
       - name: Upload

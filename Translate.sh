@@ -1,8 +1,15 @@
 #!/bin/bash
 # https://fearlessrevolution.com/viewtopic.php?p=232011#p232011
+FILE_NAME=translating.ct
 
 translate() {
-    sed -i "s/<Description>\"$1\"<\/Description>/<Description>\"$2\"<\/Description>/g" translating.ct
+    sed -i "s/<Description>\"$1\"<\/Description>/<Description>\"$2\"<\/Description>/g" $FILE_NAME
+}
+
+findItemTranslate() {
+    local SEARCH_URL=https://mhrise.mhrice.info/item/normal_$1.html
+    local SEARCH_LANG=zh-CN
+    curl -s "$SEARCH_URL" | grep -oP "<h1>.*?<span class=\"mh-lang\" lang=\"$SEARCH_LANG\"><span>[^<]+</span></span>.*?</h1>" | sed -n "s/<h1>.*<span class=\"mh-lang\" lang=\"$SEARCH_LANG\"><span>\([^<]\+\)<\/span><\/span>.*<\/h1>/\1/p"
 }
 
 translate 'Team: Tuuup! \&amp; Insterluda (click for auto attach to game) 14.0.0.0' '制作团队：Tuuup! \&amp; Insterluda 汉化团队：凉先森 \&amp; SummonHIM（单击此处自动关联游戏进程） 14.0.0.0'
@@ -110,3 +117,8 @@ translate 'P. Max Life' 'P. 最大生命值'
 translate 'P. Recovery Life' 'P. 恢复生命值'
 translate 'P. Max Stamania' 'P. 最大耐力'
 translate 'P. Max Regen Stamania' 'P. 最大恢复耐力'
+
+while IFS=: read -r hexCode itemName; do
+    newItemName=$(findItemTranslate "$hexCode")
+    translate "$hexCode:$itemName" "$hexCode:$newItemName"
+done < <(sed -n '/<DropDownList .*>/,/<\/DropDownList>/ { /^[[:space:]]*<DropDownList .*>/d; /<\/DropDownList>/d; /^[[:space:]]*$/d; p; }' $FILE_NAME)
