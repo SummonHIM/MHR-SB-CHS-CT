@@ -6,6 +6,11 @@ on:
     tags: '*'
     paths-ignore:
       - 'README.md'
+      - 'CONTRIBUTING.md'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'CONTRIBUTING.md'
 
 env:
   ORG_URL: https://fearlessrevolution.com/download/file.php?id=50081&sid=9e15b6e04206861128ccaa386cee1a40

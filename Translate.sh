@@ -4,11 +4,19 @@ FILE_NAME=translating.ct
 
 translate() {
     echo "正在翻译原描述 $1 至 $2"
-    sed -i "s/<Description>\"$1\"<\/Description>/<Description>\"$2\"<\/Description>/g" $FILE_NAME
+    {
+        sed -i "s/<Description>\"$1\"<\/Description>/<Description>\"$2\"<\/Description>/g" $FILE_NAME
+    } || {
+        exit 1
+    }
 }
 
 fullReplace() {
-    sed -i "s/$1/$2/g" $FILE_NAME
+    {
+        sed -i "s/$1/$2/g" $FILE_NAME
+    } || {
+        exit 2
+    }
 }
 
 getItemTranslate() {
@@ -142,7 +150,7 @@ while IFS=: read -r hexCode itemName; do
             echo "正在根据名称数据库翻译物品ID $hexCode:$itemName 至 $hexCode:$newItemName"
             fullReplace "$hexCode:$itemName" "$hexCode:$newItemName"
         else
-            echo "错误： 物品ID $hexCode:$itemName 无法翻译。原因是未在名称数据库中找到相对应的字符串。或原名称与数据库中英文名称不匹配。"
+            echo "警告： 物品ID $hexCode:$itemName 无法翻译。原因是未在名称数据库中找到相对应的字符串。或原名称与数据库中英文名称不匹配。"
         fi
     fi
 done < <(sed -n -e '/<DropDownList/{:a' -e 'N;/<\/DropDownList>/!ba' -e 's/ *<DropDownList[^>]*>\(.*\)<\/DropDownList>/\1/p}' $FILE_NAME)
