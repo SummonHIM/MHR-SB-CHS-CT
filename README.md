@@ -4,6 +4,9 @@
 ## 原链接/Original link
 [Re: Monster Hunter Rise [Steam]](https://fearlessrevolution.com/viewtopic.php?p=232011#p232011)
 
+## 下载/Download
+[采蘑菇（3影响力）](https://www.caimogu.cc/post/866763.html)
+
 ## 注意/Attention
 - 请使用最新版本的[Cheat Engine](https://www.cheatengine.org/)。测试时使用的版本是7.5版本。
 - 请安装 [REFramework](https://www.nexusmods.com/monsterhunterrise/mods/26) 以免闪退。
