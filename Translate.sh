@@ -2,6 +2,7 @@
 # https://fearlessrevolution.com/viewtopic.php?p=232011#p232011
 FILE_NAME=translating.ct
 
+# Translate Cheat Engine description function
 translate() {
     echo "正在翻译原描述 $1 至 $2"
     {
@@ -11,6 +12,7 @@ translate() {
     }
 }
 
+# Use sed to replace text.
 fullReplace() {
     {
         sed -i "s/$1/$2/g" $FILE_NAME
@@ -19,6 +21,7 @@ fullReplace() {
     }
 }
 
+# Use item id to get item's chinese translate
 getItemTranslate() {
     local decimalID
     local org
@@ -32,11 +35,16 @@ getItemTranslate() {
         ret=$(jq -r --arg id "$decimalID" '.entries[] | select(.name == "I_\($id)_Name").content[13]' mhrice.itemnamemr.json)
     fi
 
-    if [[ $org == "$2" ]]; then
+    # if [[ "${org,,}" == "${2,,}" ]]; then
+    #     echo "$ret"
+    # fi
+
+    if ! echo "$ret" | grep -q "#Rejected#"; then
         echo "$ret"
     fi
 }
 
+# Translate descriptions
 translate 'Team: Tuuup! \&amp; Insterluda (click for auto attach to game) 14.0.0.0' '制作团队：Tuuup! \&amp; Insterluda 汉化团队：凉先森 \&amp; SummonHIM（单击此处自动关联游戏进程） 14.0.0.0'
 translate 'Player scripts' '玩家脚本'
 translate 'Zenni and Kamura (go menu to update pointers)' '金币与炎火点数（需打开菜单栏来刷新数值）'
@@ -57,7 +65,7 @@ translate 'Amount of item' '物品数量'
 translate 'Player Hunter XP multiplier' '玩家猎人经验倍率'
 translate 'Player Master XP multiplier' '玩家大师经验倍率'
 translate 'Buddy XP multiplier' '随从经验倍率'
-translate 'Anomaly xp multiplier' '异常调查经验倍率'
+translate 'Anomaly xp multiplier' '怪异研究经验倍率'
 translate 'multiplier' '倍率'
 translate 'Multiplier' '倍率'
 translate 'some Player pointers (fix 13.0.0.0)' '更多玩家数据（修复 13.0.0.0）'
@@ -74,13 +82,13 @@ translate 'Defence' '防御'
 translate 'Affinity' '会心率'
 translate 'Wyvern heart heavybow' '机关龙弹重弩'
 translate 'Wyvern snipe heavybow' '狙击龙弹重弩'
-translate 'player hunter\/master and anomaly rank and XP (go stats menu)' '玩家猎人\/大师和异常调查等级及经验（需打开状态来刷新数值）'
+translate 'player hunter\/master and anomaly rank and XP (go stats menu)' '玩家猎人\/大师和怪异研究等级及经验（需打开状态来刷新数值）'
 translate 'Hunter rank' '猎人等级'
 translate 'Hunter XP' '猎人经验'
 translate 'Master rank' '大师等级'
 translate 'Master XP' '大师经验'
-translate 'Anomaly research' '异常调查'
-translate 'Anomaly research XP' '异常调查经验'
+translate 'Anomaly research' '怪异研究'
+translate 'Anomaly research XP' '怪异研究经验'
 translate 'Player invisible\/ monsters don'\''t react' '玩家隐身\/怪物不做反应'
 translate 'You can'\''t hurt them. Pure for making photos' '无法伤害怪物。纯当拍照使用。'
 translate 'No voucher lost? (back-up your save!!)' '无限造型券？（记得备份存档！！）'
@@ -143,6 +151,7 @@ translate 'P. Recovery Life' 'P. 恢复生命值'
 translate 'P. Max Stamania' 'P. 最大耐力'
 translate 'P. Max Regen Stamania' 'P. 最大恢复耐力'
 
+# Translate item names
 while IFS=: read -r hexCode itemName; do
     if [[ -n "$hexCode" ]]; then
         newItemName=$(getItemTranslate "$hexCode" "$itemName")
